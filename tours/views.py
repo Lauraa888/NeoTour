@@ -23,21 +23,6 @@ class ApplicationListCreateView(generics.ListAPIView):
     filterset_fields = {
         "tour__category": ["exact"],  # Фильтрация по категории тура
     }
-
-    @swagger_auto_schema(
-        operation_description="Этот эндпоинт позволяет получить "
-        "список постов. Вы можете применять "
-        "фильтрацию по категории, а также осуществлять "
-        "поиск по заголовку и содержанию постов.",
-        manual_parameters=[
-            openapi.Parameter(
-                "category_name",
-                in_=openapi.IN_QUERY,
-                type=openapi.TYPE_STRING,
-                description="Отфильтровать посты по названию категории.",
-            ),
-        ],
-    )
     def get(self, request, *args, **kwargs):
         print(os.getenv('CLOUD_NAME'))
         return super().get(request, *args, **kwargs)
@@ -52,8 +37,29 @@ class StandardResultsSetPagination(PageNumberPagination):
 # Получение списка туров и создание нового тура
 class TourListView(generics.ListAPIView):
     queryset = Tour.objects.all()
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    filterset_fields = {
+        "category": ["icontains"],
+        "title": ["icontains"],
+    }
     serializer_class = TourListSerializer
 
+    @swagger_auto_schema(
+        operation_description="Этот эндпоинт позволяет получить "
+        "список постов. Вы можете применять "
+        "фильтрацию по категории, а также осуществлять "
+        "поиск по заголовку и содержанию постов.",
+        manual_parameters=[
+            openapi.Parameter(
+                "category",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="Отфильтровать посты по названию категории.",
+            ),
+        ],
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs) # ООП - наследование
 
 class RecommendedTourView(generics.ListAPIView):
     queryset = Tour.objects.filter(recommended=True)

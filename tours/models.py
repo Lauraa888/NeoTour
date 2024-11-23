@@ -17,8 +17,8 @@ class Tour(models.Model):
 
     def __str__(self):
         return self.title
-    
-        
+
+     
 class Review(models.Model):
     tour = models.ForeignKey(Tour, related_name='reviews', on_delete=models.CASCADE)
     username = models.CharField(max_length=255)
